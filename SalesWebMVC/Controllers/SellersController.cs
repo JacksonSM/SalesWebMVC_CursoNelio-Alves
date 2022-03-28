@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SalesWebMVC.Models;
+using SalesWebMVC.Models.ViewModels;
 using SalesWebMVC.Services;
 using System;
 using System.Collections.Generic;
@@ -8,12 +9,16 @@ using System.Threading.Tasks;
 
 namespace SalesWebMVC.Controllers
 {
-    public class SellersController : Controller
-    {
+    public class SellersController : Controller { 
+
+
+        private readonly DepartmentService _departmentService;
         private readonly SellerService _sellerService;
 
-        public SellersController(SellerService sellerService)
+        public SellersController(SellerService sellerService, DepartmentService departmentService)
         {
+         
+            _departmentService = departmentService;
             _sellerService = sellerService;
         }
 
@@ -22,16 +27,34 @@ namespace SalesWebMVC.Controllers
             var list = _sellerService.FindAll();
             return View(list);
         }
-        public IActionResult Create()
+        public  IActionResult Create()
         {
-            return View();
+            var departments = _departmentService.FindAll();
+            var viewModel = new SellerFormViewModel { Departments = departments };
+            return View(viewModel);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Seller sellers)
+        public IActionResult Create(Seller seller)
         {
-            _sellerService.Insert(sellers);
+            _sellerService.Insert(seller);
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Delete(int? id)
+        {
+            if (id == null) return NotFound();
+            var obj = _sellerService.FindById(id.Value);
+            if (obj == null) return NotFound();
+            return View(obj);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            _sellerService.Remove(id);
+            return RedirectToAction(nameof(Index));
+
         }
     }
 }
