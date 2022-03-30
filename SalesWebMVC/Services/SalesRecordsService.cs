@@ -53,5 +53,8 @@ namespace SalesWebMVC.Services
                 .GroupBy(x => x.Seller.Department)
                 .ToListAsync();
         }
+
+
+
     }
 }
